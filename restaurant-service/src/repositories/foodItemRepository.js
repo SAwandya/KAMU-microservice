@@ -4,7 +4,7 @@ exports.create = async (data) => {
   const { restaurantId, name, description, price, prepareTime, isPromotion } =
     data;
   const [r] = await poolFI.execute(
-    `INSERT INTO food_items (restaurantId,name,description,price,prepareTime,isPromotion) VALUES (?,?,?,?,?,?)`,
+    `INSERT INTO FoodItem (restaurantId,name,description,price,prepareTime,isPromotion) VALUES (?,?,?,?,?,?)`,
     [restaurantId, name, description, price, prepareTime, isPromotion]
   );
   return new FoodItem(
@@ -19,7 +19,7 @@ exports.create = async (data) => {
 };
 exports.findByRestaurant = async (rid) => {
   const [rows] = await poolFI.execute(
-    `SELECT * FROM food_items WHERE restaurantId=?`,
+    `SELECT * FROM FoodItem WHERE restaurantId=?`,
     [rid]
   );
   return rows.map(
@@ -48,8 +48,8 @@ exports.update = async (id, data) => {
   );
   if (!f.length) return null;
   v.push(id);
-  await poolFI.execute(`UPDATE food_items SET ${f.join(",")} WHERE id=?`, v);
-  const [r] = await poolFI.execute(`SELECT * FROM food_items WHERE id=?`, [id]);
+  await poolFI.execute(`UPDATE FoodItem SET ${f.join(",")} WHERE id=?`, v);
+  const [r] = await poolFI.execute(`SELECT * FROM FoodItem WHERE id=?`, [id]);
   const x = r[0];
   return new FoodItem(
     x.id,
@@ -62,5 +62,5 @@ exports.update = async (id, data) => {
   );
 };
 exports.delete = async (id) => {
-  await poolFI.execute(`DELETE FROM food_items WHERE id=?`, [id]);
+  await poolFI.execute(`DELETE FROM FoodItem WHERE id=?`, [id]);
 };
