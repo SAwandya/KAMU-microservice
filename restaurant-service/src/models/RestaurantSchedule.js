@@ -1,2 +1,9 @@
-class RestaurantSchedule { constructor(id, restaurantId, workDayId, workHoursId) { this.id = id; this.restaurantId = restaurantId; this.workDayId = workDayId; this.workHoursId = workHoursId; } }
+class RestaurantSchedule {
+  constructor(id, restaurantId, workDayId, workHoursId) {
+    this.id = id;
+    this.restaurantId = restaurantId;
+    this.workDayId = workDayId;
+    this.workHoursId = workHoursId;
+  }
+}
 module.exports = RestaurantSchedule;

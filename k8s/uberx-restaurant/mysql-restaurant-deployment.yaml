@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-restaurant
+  namespace: uberx-restaurant
+  labels:
+    app: mysql-restaurant
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql-restaurant
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysql-restaurant
+    spec:
+      containers:
+        - image: mysql:8.0
+          name: mysql-restaurant
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-restaurant-credentials
+                  key: root-password
+            - name: MYSQL_DATABASE
+              value: restaurant_db
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-restaurant-credentials
+                  key: username
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-restaurant-credentials
+                  key: password
+          ports:
+            - containerPort: 3306
+              name: mysql
+          volumeMounts:
+            # - name: mysql-restaurant-persistent-storage # Mount the persistent storage volume
+            #   mountPath: /var/lib/mysql
+            - name: mysql-restaurant-init-scripts # Mount the initialization scripts volume
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        # - name: mysql-restaurant-persistent-storage # Define the volume using the PVC
+        #   persistentVolumeClaim:
+        #     claimName: mysql-restaurant-pv-claim # Reference the PVC for restaurant DB
+        - name: mysql-restaurant-init-scripts # Define the volume using the ConfigMap
+          configMap:
+            name: mysql-restaurant-init-scripts # Reference the ConfigMap for order DB init scripts

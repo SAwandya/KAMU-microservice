@@ -1,7 +1,38 @@
-const r= require('express').Router(); const c=require('../controllers/restaurantController'); const {authenticate,authorizeRole}=require('../middlewares/authMiddleware');
-r.post('/',authenticate,authorizeRole('RestaurantAdmin'),c.register);
-r.get('/me',authenticate,authorizeRole('RestaurantAdmin'),c.getMine);
-r.put('/:id/approve',authenticate,authorizeRole('SystemAdmin'),c.approve);
-r.put('/:id',authenticate,authorizeRole('RestaurantAdmin'),c.update);
-r.delete('/:id',authenticate,authorizeRole('RestaurantAdmin'),c.delete);
-module.exports=r;
+const route = require("express").Router();
+const restaurantController = require("../controllers/restaurantController");
+const {
+  authenticate,
+  authorizeRole,
+} = require("../middlewares/authMiddleware");
+
+route.post(
+  "/",
+  authenticate,
+  authorizeRole("RestaurantAdmin"),
+  restaurantController.register
+);
+route.get(
+  "/me",
+  authenticate,
+  authorizeRole("RestaurantAdmin"),
+  restaurantController.getMine
+);
+route.put(
+  "/:id/approve",
+  authenticate,
+  authorizeRole("SystemAdmin"),
+  restaurantController.approve
+);
+route.put(
+  "/:id",
+  authenticate,
+  authorizeRole("RestaurantAdmin"),
+  restaurantController.update
+);
+route.delete(
+  "/:id",
+  authenticate,
+  authorizeRole("RestaurantAdmin"),
+  restaurantController.delete
+);
+module.exports = route;

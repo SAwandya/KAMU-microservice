@@ -1,0 +1,13 @@
+# k8s/uberx-restaurant/mysql-restaurant-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-restaurant # Service for restaurant DB within the restaurant namespace
+  namespace: uberx-restaurant # <--- UPDATED NAMESPACE
+spec:
+  selector:
+    app: mysql-restaurant
+  ports:
+  - port: 3306
+    targetPort: 3306
+  type: ClusterIP

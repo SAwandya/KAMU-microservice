@@ -35,6 +35,16 @@ exports.registerCustomer = async (userData) => {
   };
 };
 
+exports.getAllUser = async () => {
+  const users = await userRepository.findAllUsers();
+  return users.map((user) => ({
+    id: user.id,
+    fullName: user.fullName,
+    email: user.email,
+    role: user.role
+  }));
+}
+
 exports.registerRider = async (userData) => {
   // Check if user already exists
   const existingUser = await userRepository.findByEmail(userData.email);
@@ -82,6 +92,8 @@ exports.login = async (email, password) => {
   if (!isPasswordValid) {
     throw new Error("Invalid credentials");
   }
+
+  console.log("User role:", user.role); // Debugging line
 
   // Generate tokens
   const accessToken = generateAccessToken(user.id, user.role);

@@ -1,0 +1,35 @@
+# k8s/uberx-restaurant/mysql-restaurant-pv.yaml
+
+# --- Persistent Volume for mysql-restaurant ---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-restaurant-pv-volume
+  # No namespace for PV
+  labels:
+    type: local
+    app: mysql-restaurant
+spec:
+  storageClassName: standard
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data-restaurant" # Ensure this path exists and is unique
+
+---
+
+# --- Persistent Volume Claim for mysql-restaurant ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-restaurant-pv-claim
+  namespace: uberx-restaurant # <--- UPDATED NAMESPACE (PVC is namespaced)
+spec:
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

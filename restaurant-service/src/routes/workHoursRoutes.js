@@ -1,1 +1,5 @@
-const wh=require('express').Router(); const cWH=require('../controllers/workHoursController'); const {authenticate}=require('../middlewares/authMiddleware'); wh.get('/',authenticate,cWH.list); module.exports=wh;
+const wh = require("express").Router();
+const cWH = require("../controllers/workHoursController");
+const { authenticate } = require("../middlewares/authMiddleware");
+wh.get("/", authenticate, cWH.list);
+module.exports = wh;

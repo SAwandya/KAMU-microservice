@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-restaurant-init-scripts
+  namespace: uberx-restaurant
+data:
+  init-db.sql: |
+    SET SQL_MODE = "STRICT_ALL_TABLES";
+
+    CREATE DATABASE IF NOT EXISTS restaurant_db;
+    USE restaurant_db;
+
+    -- Create WorkDay table
+    CREATE TABLE IF NOT EXISTS `WorkDay` (
+      `id` INT AUTO_INCREMENT PRIMARY KEY,
+      `day` VARCHAR(20) NOT NULL
+    ) ENGINE=InnoDB;
+
+    -- Create WorkHours table
+    CREATE TABLE IF NOT EXISTS `WorkHours` (
+      `id` INT AUTO_INCREMENT PRIMARY KEY,
+      `startTime` TIME NOT NULL,
+      `endTime` TIME NOT NULL
+    ) ENGINE=InnoDB;
+
+    -- Create Restaurant table
+    CREATE TABLE IF NOT EXISTS `Restaurant` (
+      `id` INT AUTO_INCREMENT PRIMARY KEY,
+      `ownerId` INT NOT NULL,
+      `name` VARCHAR(255) NOT NULL,
+      `address` TEXT NOT NULL,
+      `images` TEXT,
+      `isAvailable` BOOLEAN DEFAULT TRUE,
+      `status` VARCHAR(50)
+    ) ENGINE=InnoDB;
+
+    -- Create FoodItem table
+    CREATE TABLE IF NOT EXISTS `FoodItem` (
+      `id` INT AUTO_INCREMENT PRIMARY KEY,
+      `restaurantId` INT NOT NULL,
+      `name` VARCHAR(255) NOT NULL,
+      `description` TEXT,
+      `price` DECIMAL(10, 2) NOT NULL,
+      `prepareTime` INT NOT NULL,
+      `isPromotion` BOOLEAN DEFAULT FALSE,
+      FOREIGN KEY (`restaurantId`) REFERENCES `Restaurant`(`id`)
+    ) ENGINE=InnoDB;
+
+    -- Create RestaurantOrder table
+    CREATE TABLE IF NOT EXISTS `RestaurantOrder` (
+      `id` INT AUTO_INCREMENT PRIMARY KEY,
+      `orderId` INT NOT NULL,
+      `customerId` INT NOT NULL,
+      `restaurantId` INT NOT NULL,
+      `items` JSON NOT NULL,
+      `deliveryFee` DECIMAL(10, 2),
+      `status` VARCHAR(50) NOT NULL,
+      `createdAt` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (`restaurantId`) REFERENCES `Restaurant`(`id`)
+    ) ENGINE=InnoDB;
+
+    -- Create RestaurantSchedule table
+    CREATE TABLE IF NOT EXISTS `RestaurantSchedule` (
+      `id` INT AUTO_INCREMENT PRIMARY KEY,
+      `restaurantId` INT NOT NULL,
+      `workDayId` INT NOT NULL,
+      `workHoursId` INT NOT NULL,
+      FOREIGN KEY (`restaurantId`) REFERENCES `Restaurant`(`id`),
+      FOREIGN KEY (`workDayId`) REFERENCES `WorkDay`(`id`),
+      FOREIGN KEY (`workHoursId`) REFERENCES `WorkHours`(`id`)
+    ) ENGINE=InnoDB;
+
+    -- Sample data for WorkDay table
+    INSERT INTO `WorkDay` (`day`) VALUES 
+      ('Monday'), 
+      ('Tuesday'), 
+      ('Wednesday'), 
+      ('Thursday'), 
+      ('Friday'), 
+      ('Saturday'), 
+      ('Sunday');
+
+    -- Sample data for WorkHours table
+    INSERT INTO `WorkHours` (`startTime`, `endTime`) VALUES 
+      ('09:00:00', '18:00:00'),
+      ('18:00:00', '23:00:00');

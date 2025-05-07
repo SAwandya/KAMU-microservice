@@ -2,7 +2,6 @@ const db = require("../config/database");
 const User = require("../models/user");
 const { convertDate } = require("../utils/dateUtils"); // Corrected typo: dataUtils -> dateUtils
 
-
 exports.findByEmail = async (email) => {
   try {
     const [rows] = await db.execute("SELECT * FROM users WHERE email = ?", [
@@ -12,11 +11,26 @@ exports.findByEmail = async (email) => {
     if (rows.length === 0) return null;
 
     const user = rows[0];
-    return new User(user.id, user.fullName, user.email, user.password);
+    return new User(user.id, user.fullName, user.email, user.password, user.role);
   } catch (error) {
     throw new Error(`Database error: ${error.message}`);
   }
-}
+};
+
+exports.findAllUsers = async () => {
+  try {
+    const [rows] = await db.execute("SELECT * FROM users");
+
+    if (rows.length === 0) return [];
+
+    return rows.map(
+      (user) =>
+        new User(user.id, user.fullName, user.email, user.password, user.role)
+    );
+  } catch (error) {
+    throw new Error(`Database error: ${error.message}`);
+  }
+};
 
 exports.findByVehicleREG = async (vehicleREG) => {
   try {
@@ -32,7 +46,7 @@ exports.findByVehicleREG = async (vehicleREG) => {
   } catch (error) {
     throw new Error(`Database error: ${error.message}`);
   }
-}
+};
 
 exports.findById = async (id) => {
   try {
