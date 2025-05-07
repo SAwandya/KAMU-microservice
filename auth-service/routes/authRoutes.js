@@ -9,6 +9,7 @@ router.post("/register/rider", authController.registerRider);
 router.post("/login", authController.login);
 router.post("/refresh-token", authController.refreshToken);
 router.post("/validate", authController.validateToken);
+router.get("/user", authController.getUser);
 
 // Protected routes
 router.post("/logout", authenticate, authController.logout);

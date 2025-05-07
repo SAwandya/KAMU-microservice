@@ -9,10 +9,24 @@ exports.registerCustomer = async (req, res, next) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    const user = await authService.registerCustomer({ fullName, email, password, role });
+    const user = await authService.registerCustomer({
+      fullName,
+      email,
+      password,
+      role,
+    });
     res.status(201).json({ user });
   } catch (error) {
     next(error);
+  }
+};
+
+exports.getUser = async (req, res) => {
+  try {
+    const user = await authService.getAllUser();
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -35,7 +49,7 @@ exports.registerRider = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-}
+};
 
 exports.login = async (req, res, next) => {
   try {
@@ -77,9 +91,7 @@ exports.validateToken = async (req, res) => {
   } catch (err) {
     res.sendStatus(401);
   }
-
 };
-
 
 exports.refreshToken = async (req, res, next) => {
   try {
