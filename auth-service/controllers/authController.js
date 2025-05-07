@@ -1,32 +1,53 @@
 const authService = require("../services/authService");
 const { verifyAccessToken } = require("../utils/tokenUtils");
 
-exports.register = async (req, res, next) => {
+exports.registerCustomer = async (req, res, next) => {
   try {
-    const { username, email, password } = req.body;
+    const { fullName, email, password, role } = req.body;
 
-    if (!username || !email || !password) {
+    if (!fullName || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    const user = await authService.register({ username, email, password });
+    const user = await authService.registerCustomer({ fullName, email, password, role });
     res.status(201).json({ user });
   } catch (error) {
     next(error);
   }
 };
 
-exports.login = async (req, res, next) => {
+exports.registerRider = async (req, res, next) => {
   try {
-    const { username, password } = req.body;
+    const { fullName, email, password, role, vehicleREG } = req.body;
 
-    if (!username || !password) {
-      return res
-        .status(400)
-        .json({ message: "Username and password are required" });
+    if (!fullName || !email || !password || !vehicleREG) {
+      return res.status(400).json({ message: "All fields are required" });
     }
 
-    const result = await authService.login(username, password);
+    const user = await authService.registerRider({
+      fullName,
+      email,
+      password,
+      role,
+      vehicleREG,
+    });
+    res.status(201).json({ user });
+  } catch (error) {
+    next(error);
+  }
+}
+
+exports.login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: "Email and password are required" });
+    }
+
+    const result = await authService.login(email, password);
 
     // Set refresh token as HTTP-only cookie
     res.cookie("refreshToken", result.tokens.refreshToken, {

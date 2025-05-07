@@ -43,14 +43,14 @@ spec:
         - containerPort: 3306
           name: mysql
         volumeMounts:
-        - name: mysql-auth-persistent-storage # Mount the persistent storage volume
-          mountPath: /var/lib/mysql
+        # - name: mysql-auth-persistent-storage # Mount the persistent storage volume
+        #   mountPath: /var/lib/mysql
         - name: mysql-auth-init-scripts # Mount the initialization scripts volume
           mountPath: /docker-entrypoint-initdb.d
       volumes:
-      - name: mysql-auth-persistent-storage # Define the volume using the PVC
-        persistentVolumeClaim:
-          claimName: mysql-auth-pv-claim # Reference the PVC for auth DB
+      # - name: mysql-auth-persistent-storage # Define the volume using the PVC
+      #   persistentVolumeClaim:
+      #     claimName: mysql-auth-pv-claim # Reference the PVC for auth DB
       - name: mysql-auth-init-scripts # Define the volume using the ConfigMap
         configMap:
           name: mysql-auth-init-scripts # Reference the ConfigMap for auth DB init scripts

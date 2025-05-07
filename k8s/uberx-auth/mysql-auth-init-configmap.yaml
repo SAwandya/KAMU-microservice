@@ -11,17 +11,18 @@ data:
 
     CREATE TABLE IF NOT EXISTS users (
         id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-        username VARCHAR(50) NOT NULL UNIQUE,
         email VARCHAR(100) NOT NULL UNIQUE,
         password VARCHAR(255) NOT NULL,
-        first_name VARCHAR(50),
-        last_name VARCHAR(50),
-        -- Add other user fields from ERD if managed by auth service
-        -- role VARCHAR(20) DEFAULT 'customer',
-        -- address VARCHAR(255),
-        -- phone VARCHAR(20),
+        fullName VARCHAR(50),
+        role VARCHAR(20) DEFAULT 'customer',
+        address VARCHAR(255),
+        phone VARCHAR(20),
+        vehicleREG VARCHAR(20),
+        earning DECIMAL(10, 2) DEFAULT 0.00,
+        location VARCHAR(255),
         is_active BOOLEAN DEFAULT TRUE,
         is_verified BOOLEAN DEFAULT FALSE,
+        is_available BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );

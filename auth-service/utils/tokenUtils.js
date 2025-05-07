@@ -2,13 +2,13 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const { ACCESS_TOKEN, REFRESH_TOKEN } = require("../config/jwt");
 
-exports.generateAccessToken = (userId) => {
-  return jwt.sign({ userId }, ACCESS_TOKEN.secret, {
+exports.generateAccessToken = (userId, role) => {
+  return jwt.sign({ userId, role }, ACCESS_TOKEN.secret, {
     expiresIn: ACCESS_TOKEN.expiry,
   });
 };
 
-exports.generateRefreshToken = (userId) => {
+exports.generateRefreshToken = (userId, role) => {
   return jwt.sign({ userId }, REFRESH_TOKEN.secret, {
     expiresIn: REFRESH_TOKEN.expiry,
   });

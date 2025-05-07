@@ -9,33 +9,70 @@ const {
 const { REFRESH_TOKEN } = require("../config/jwt");
 
 
-exports.register = async (userData) => {
+exports.registerCustomer = async (userData) => {
   // Check if user already exists
-  const existingUser = await userRepository.findByUsername(userData.username);
+  const existingUser = await userRepository.findByEmail(userData.email);
   if (existingUser) {
-    throw new Error("Username already exists");
+    throw new Error("Email already exists");
   }
 
   // Hash password
   const hashedPassword = await hashPassword(userData.password);
 
   // Create user
-  const user = await userRepository.createUser({
-    username: userData.username,
+  const user = await userRepository.createCustomer({
+    fullName: userData.fullName,
     email: userData.email,
     password: hashedPassword,
+    role: userData.role,
   });
 
   return {
     id: user.id,
-    username: user.username,
+    fullName: user.fullName,
     email: user.email,
+    role: user.role,
   };
 };
 
-exports.login = async (username, password) => {
+exports.registerRider = async (userData) => {
+  // Check if user already exists
+  const existingUser = await userRepository.findByEmail(userData.email);
+  if (existingUser) {
+    throw new Error("Email already exists");
+  }
+
+  const existingVehicle = await userRepository.findByVehicleREG(
+    userData.vehicleREG
+  );
+  if (existingVehicle) {
+    throw new Error("Vehicle registration number already exists");
+  }
+
+  // Hash password
+  const hashedPassword = await hashPassword(userData.password);
+
+  // Create user
+  const user = await userRepository.createRider({
+    fullName: userData.fullName,
+    email: userData.email,
+    password: hashedPassword,
+    role: userData.role,
+    vehicleREG: userData.vehicleREG,
+  });
+
+  return {
+    id: user.id,
+    fullName: user.fullName,
+    email: user.email,
+    role: user.role,
+    vehicleREG: user.vehicleREG,
+  };
+}
+
+exports.login = async (email, password) => {
   // Find user
-  const user = await userRepository.findByUsername(username);
+  const user = await userRepository.findByEmail(email);
   if (!user) {
     throw new Error("Invalid credentials");
   }
@@ -47,8 +84,8 @@ exports.login = async (username, password) => {
   }
 
   // Generate tokens
-  const accessToken = generateAccessToken(user.id);
-  const refreshToken = generateRefreshToken(user.id);
+  const accessToken = generateAccessToken(user.id, user.role);
+  const refreshToken = generateRefreshToken(user.id, user.role);
 
   // Store refresh token hash
   const refreshTokenHash = generateRefreshTokenHash(refreshToken);
@@ -62,7 +99,7 @@ exports.login = async (username, password) => {
   return {
     user: {
       id: user.id,
-      username: user.username,
+      fullName: user.fullName,
       email: user.email,
     },
     tokens: {
@@ -96,8 +133,8 @@ exports.refreshToken = async (refreshToken) => {
   }
 
   // Generate new tokens
-  const newAccessToken = generateAccessToken(user.id);
-  const newRefreshToken = generateRefreshToken(user.id);
+  const newAccessToken = generateAccessToken(user.id, user.role);
+  const newRefreshToken = generateRefreshToken(user.id, user.role);
 
   // Replace old refresh token with new one
   await userRepository.deleteRefreshToken(user.id, refreshTokenHash);

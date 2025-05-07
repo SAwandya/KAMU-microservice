@@ -2,20 +2,37 @@ const db = require("../config/database");
 const User = require("../models/user");
 const { convertDate } = require("../utils/dateUtils"); // Corrected typo: dataUtils -> dateUtils
 
-exports.findByUsername = async (username) => {
+
+exports.findByEmail = async (email) => {
   try {
-    const [rows] = await db.execute("SELECT * FROM users WHERE username = ?", [
-      username,
+    const [rows] = await db.execute("SELECT * FROM users WHERE email = ?", [
+      email,
     ]);
 
     if (rows.length === 0) return null;
 
     const user = rows[0];
-    return new User(user.id, user.username, user.email, user.password);
+    return new User(user.id, user.fullName, user.email, user.password);
   } catch (error) {
     throw new Error(`Database error: ${error.message}`);
   }
-};
+}
+
+exports.findByVehicleREG = async (vehicleREG) => {
+  try {
+    const [rows] = await db.execute(
+      "SELECT * FROM users WHERE vehicleREG = ?",
+      [vehicleREG]
+    );
+
+    if (rows.length === 0) return null;
+
+    const user = rows[0];
+    return new User(user.id, user.fullName, user.email, user.password);
+  } catch (error) {
+    throw new Error(`Database error: ${error.message}`);
+  }
+}
 
 exports.findById = async (id) => {
   try {
@@ -24,17 +41,30 @@ exports.findById = async (id) => {
     if (rows.length === 0) return null;
 
     const user = rows[0];
-    return new User(user.id, user.username, user.email, user.password);
+    return new User(user.id, user.fullName, user.email, user.password);
   } catch (error) {
     throw new Error(`Database error: ${error.message}`);
   }
 };
 
-exports.createUser = async (user) => {
+exports.createCustomer = async (user) => {
   try {
     const [result] = await db.execute(
-      "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-      [user.username, user.email, user.password]
+      "INSERT INTO users (fullName, email, password, role) VALUES (?, ?, ?, ?)",
+      [user.fullName, user.email, user.password, user.role]
+    );
+
+    return { ...user, id: result.insertId };
+  } catch (error) {
+    throw new Error(`Database error: ${error.message}`);
+  }
+};
+
+exports.createRider = async (user) => {
+  try {
+    const [result] = await db.execute(
+      "INSERT INTO users (fullName, email, password, role, vehicleREG) VALUES (?, ?, ?, ?, ?)",
+      [user.fullName, user.email, user.password, user.role, user.vehicleREG]
     );
 
     return { ...user, id: result.insertId };
