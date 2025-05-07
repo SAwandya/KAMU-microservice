@@ -1,0 +1,74 @@
+# k8s/uberx-promotion/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: promotion-service
+  namespace: uberx-promotion # <--- Correct namespace
+  labels:
+    app: promotion-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: promotion-service
+  template:
+    metadata:
+      labels:
+        app: promotion-service
+    spec:
+      containers:
+      - name: promotion-service
+        image: thusalapi/promotion-service:latest
+        ports:
+        - containerPort: 4001
+        env:
+        - name: NATS_URL
+          value: "nats://nats.uberx-nats.svc.cluster.local:4222"    
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "5001"
+        - name: DB_HOST
+          # Connect to DB service in the same namespace
+          value: "mysql-promotion" # <--- UPDATED HOST
+        - name: DB_PORT
+          value: "3306"
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              # Secret is in the same namespace
+              name: mysql-promotion-credentials
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              # Secret is in the same namespace
+              name: mysql-promotion-credentials
+              key: password
+        - name: DB_NAME
+          value: "promotion_db"
+        - name: ACCESS_TOKEN_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secrets
+              key: access-token-secret
+        # ... resources, probes ...
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: "512Mi"
+          requests:
+            cpu: "0.2"
+            memory: "256Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5001
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5001
+          initialDelaySeconds: 5
+          periodSeconds: 5

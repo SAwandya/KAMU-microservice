@@ -1,0 +1,74 @@
+# k8s/uberx-order/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: uberx-payment # <--- Correct namespace
+  labels:
+    app: payment-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+    spec:
+      containers:
+      - name: payment-service
+        image: thusalapi/payment-service:latest
+        ports:
+        - containerPort: 4001
+        env:
+        - name: NATS_URL
+          value: "nats://nats.uberx-nats.svc.cluster.local:4222"    
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "4006"
+        - name: DB_HOST
+          # Connect to DB service in the same namespace
+          value: "mysql-payment" # <--- UPDATED HOST
+        - name: DB_PORT
+          value: "3306"
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              # Secret is in the same namespace
+              name: mysql-payment-credentials
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              # Secret is in the same namespace
+              name: mysql-payment-credentials
+              key: password
+        - name: DB_NAME
+          value: "payment_db"
+        - name: ACCESS_TOKEN_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secrets
+              key: access-token-secret
+        # ... resources, probes ...
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: "512Mi"
+          requests:
+            cpu: "0.2"
+            memory: "256Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 4006
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 4006
+          initialDelaySeconds: 5
+          periodSeconds: 5

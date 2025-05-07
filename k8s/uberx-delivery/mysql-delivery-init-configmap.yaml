@@ -1,0 +1,30 @@
+# k8s/delivery-service/mysql-delivery-init-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-delivery-init-scripts
+  namespace: uberx-delivery
+data:
+  init_delivery.sql: |
+    CREATE DATABASE IF NOT EXISTS delivery_service;
+    USE delivery_service;
+
+    CREATE TABLE IF NOT EXISTS trips (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        orderId BIGINT NOT NULL,
+        riderId BIGINT,
+        customerId BIGINT NOT NULL,
+        status ENUM('pending', 'active', 'completed', 'canceled') DEFAULT 'pending',
+        startLocation JSON,
+        endLocation JSON,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS riders (
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        isAvailable BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    );
