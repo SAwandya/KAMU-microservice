@@ -169,6 +169,7 @@ manifests:
     - k8s/uberx-payment/deployment.yaml
     - k8s/uberx-payment/service.yaml
     - k8s/uberx-payment/jwt-secrets.yaml
+    - k8s/uberx-payment/stripe-secrets.yaml
 
     # Deploy Gateway resources
     - k8s/uberx-gateway/deployment.yaml

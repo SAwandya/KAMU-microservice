@@ -52,6 +52,16 @@ spec:
             secretKeyRef:
               name: jwt-secrets
               key: access-token-secret
+        - name: STRIPE_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: stripe-secrets
+              key: stripe-key-secret
+        - name: STRIPE_WEBHOOK_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: stripe-secrets
+              key: stripe-webhook-secret
         # ... resources, probes ...
         resources:
           limits:
