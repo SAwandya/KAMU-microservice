@@ -116,6 +116,29 @@ build:
           - src: "events/**/*.js"
             dest: .
 
+    - image: thusalapi/restaurant-service
+      context: restaurant-service
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: "src/**/*.js"
+            dest: .
+          - src: "*.js"
+            dest: .
+          - src: "controllers/**/*.js"
+            dest: .
+          - src: "services/**/*.js"
+            dest: .
+          - src: "routes/**/*.js"
+            dest: .
+          - src: "middleware/**/*.js"
+            dest: .
+          - src: "utils/**/*.js"
+            dest: .
+          - src: "events/**/*.js"
+            dest: .
+
     - image: thusalapi/nginx # The custom image name you want to build
       context: nginx # The directory containing Dockerfile and nginx.conf
       docker:
@@ -170,6 +193,16 @@ manifests:
     - k8s/uberx-payment/service.yaml
     - k8s/uberx-payment/jwt-secrets.yaml
     - k8s/uberx-payment/stripe-secrets.yaml
+
+    # Deploy payment related resources (including its DB and secret)
+    - k8s/uberx-restaurant/mysql-restaurant-pv.yaml
+    - k8s/uberx-restaurant/mysql-restaurant-credentials.yaml
+    - k8s/uberx-restaurant/mysql-restaurant-init-configmap.yaml
+    - k8s/uberx-restaurant/mysql-restaurant-deployment.yaml
+    - k8s/uberx-restaurant/mysql-restaurant-service.yaml
+    - k8s/uberx-restaurant/deployment.yaml
+    - k8s/uberx-restaurant/service.yaml
+    - k8s/uberx-restaurant/jwt-secrets.yaml
 
     # Deploy Gateway resources
     - k8s/uberx-gateway/deployment.yaml
@@ -227,6 +260,16 @@ portForward:
     namespace: uberx-delivery
     port: 5000
     localPort: 5000
+  - resourceType: service
+    resourceName: restaurant-service
+    namespace: uberx-restaurant
+    port: 3004
+    localPort: 3004
+  - resourceType: service
+    resourceName: mysql-restaurant
+    namespace: uberx-restaurant # <<< UPDATED NAMESPACE
+    port: 3306
+    localPort: 33066
   - resourceType: service
     resourceName: mysql-delivery
     namespace: uberx-delivery # <<< UPDATED NAMESPACE

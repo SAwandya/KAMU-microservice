@@ -1,0 +1,13 @@
+# k8s/restaurant-service/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: restaurant-service
+  namespace: uberx-restaurant # <--- UPDATED NAMESPACE
+spec:
+  selector:
+    app: restaurant-service
+  ports:
+  - port: 3004
+    targetPort: 3004
+  type: ClusterIP

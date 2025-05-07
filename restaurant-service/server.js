@@ -13,6 +13,13 @@ async function start() {
   const app = express();
   app.use(express.json());
   // await natsMgr.connect(); // load subscriber
+
+  // Health check endpoint
+  app.get("/health", (req, res) => {
+    // You could enhance this later to check DB connectivity too
+    res.status(200).send("OK");
+  });
+
   app.use("/api/restaurant", restaurantRoutes);
   app.use("/api/restaurant/work-days", workDayRoutes);
   app.use("/api/restaurant/work-hours", workHoursRoutes);

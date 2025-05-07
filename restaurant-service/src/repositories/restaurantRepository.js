@@ -3,7 +3,7 @@ const Restaurant = require("../models/Restaurant");
 const { RESTAURANT_STATUS } = require("../utils/constants");
 exports.create = async ({ ownerId, name, address, images }) => {
   const [res] = await pool.execute(
-    `INSERT INTO restaurant (ownerId,name,address,images,status) VALUES (?,?,?,?,?)`,
+    `INSERT INTO Restaurant (ownerId,name,address,images,status) VALUES (?,?,?,?,?)`,
     [ownerId, name, address, images, RESTAURANT_STATUS.PENDING]
   );
   return new Restaurant(
@@ -17,7 +17,7 @@ exports.create = async ({ ownerId, name, address, images }) => {
   );
 };
 exports.findById = async (id) => {
-  const [r] = await pool.execute(`SELECT * FROM restaurant WHERE id=?`, [id]);
+  const [r] = await pool.execute(`SELECT * FROM Restaurant WHERE id=?`, [id]);
   if (!r.length) return null;
   const x = r[0];
   return new Restaurant(
@@ -31,7 +31,7 @@ exports.findById = async (id) => {
   );
 };
 exports.findByOwner = async (ownerId) => {
-  const [r] = await pool.execute(`SELECT * FROM restaurant WHERE ownerId=?`, [
+  const [r] = await pool.execute(`SELECT * FROM Restaurant WHERE ownerId=?`, [
     ownerId,
   ]);
   if (!r.length) return null;
@@ -47,10 +47,7 @@ exports.findByOwner = async (ownerId) => {
   );
 };
 exports.updateStatus = async (id, status) => {
-  await pool.execute(`UPDATE restaurant SET status=? WHERE id=?`, [
-    status,
-    id,
-  ]);
+  await pool.execute(`UPDATE Restaurant SET status=? WHERE id=?`, [status, id]);
   return exports.findById(id);
 };
 exports.update = async (id, data) => {
@@ -64,9 +61,9 @@ exports.update = async (id, data) => {
   });
   if (!f.length) return exports.findById(id);
   v.push(id);
-  await pool.execute(`UPDATE restaurant SET ${f.join(",")} WHERE id=?`, v);
+  await pool.execute(`UPDATE Restaurant SET ${f.join(",")} WHERE id=?`, v);
   return exports.findById(id);
 };
 exports.delete = async (id) => {
-  await pool.execute(`DELETE FROM restaurant WHERE id=?`, [id]);
+  await pool.execute(`DELETE FROM Restaurant WHERE id=?`, [id]);
 };
