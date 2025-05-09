@@ -7,7 +7,6 @@ data:
   init_order.sql: |
     CREATE DATABASE IF NOT EXISTS order_db;
     USE order_db;
-    # ... (SQL for orders, order_items, payments, deliveries tables - see previous examples) ...
 
     CREATE TABLE IF NOT EXISTS orders (
         id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -20,6 +19,7 @@ data:
         totalBill DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
         deliveryFee DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
         status VARCHAR(50) NOT NULL DEFAULT 'PENDING',
+        deliveryAddress VARCHAR(255) NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     );
@@ -30,6 +30,9 @@ data:
         foodItemId INT UNSIGNED NOT NULL,
         quantity INT UNSIGNED NOT NULL DEFAULT 1,
         price DECIMAL(10, 2) NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (orderId) REFERENCES orders(id) ON DELETE CASCADE
     );
 
@@ -60,6 +63,17 @@ data:
         FOREIGN KEY (orderId) REFERENCES orders(id) ON DELETE CASCADE
     );
 
+    CREATE TABLE IF NOT EXISTS order_status_history (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        orderId INT UNSIGNED NOT NULL,
+        status VARCHAR(50) NOT NULL,
+        timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        notes TEXT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (orderId) REFERENCES orders(id) ON DELETE CASCADE
+    );
+
     -- Add indexes
     ALTER TABLE orders ADD INDEX idx_customer (customerId);
     ALTER TABLE orders ADD INDEX idx_restaurant (restaurantId);
@@ -69,3 +83,91 @@ data:
     ALTER TABLE payments ADD INDEX idx_status (status);
     ALTER TABLE deliveries ADD INDEX idx_status (status);
     ALTER TABLE deliveries ADD INDEX idx_assigned_rider (assignedRiderId);
+    
+    -- Sample Orders
+    INSERT INTO orders (id, customerId, restaurantId, status, totalBill, deliveryFee, deliveryAddress, created_at, updated_at)
+    VALUES
+      (101, 1, 1, 'DELIVERED', 29.97, 2.99, '123 Main St, City', DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_SUB(NOW(), INTERVAL 10 DAY)),
+      (102, 2, 2, 'DELIVERED', 21.49, 2.99, '456 Elm St, Town', DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_SUB(NOW(), INTERVAL 5 DAY)),
+      (103, 1, 3, 'DELIVERED', 39.74, 2.99, '123 Main St, City', DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)),
+      (104, 2, 4, 'CANCELLED', 15.24, 2.99, '456 Elm St, Town', DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_SUB(NOW(), INTERVAL 1 DAY)),
+      (105, 1, 1, 'COOKING', 23.97, 2.99, '123 Main St, City', DATE_SUB(NOW(), INTERVAL 2 HOUR), DATE_SUB(NOW(), INTERVAL 2 HOUR));
+
+    -- Order Items - for past orders
+    INSERT INTO order_items (orderId, foodItemId, quantity, price, name, created_at, updated_at)
+    VALUES
+      -- Order 1 items
+      (101, 1, 2, 10.99, 'Margherita Pizza', DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_SUB(NOW(), INTERVAL 10 DAY)),
+      (101, 3, 1, 6.99, 'Tiramisu', DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_SUB(NOW(), INTERVAL 10 DAY)),
+      
+      -- Order 2 items
+      (102, 5, 1, 14.99, 'Butter Chicken', DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_SUB(NOW(), INTERVAL 5 DAY)),
+      (102, 7, 2, 2.99, 'Garlic Naan', DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_SUB(NOW(), INTERVAL 5 DAY)),
+      
+      -- Order 3 items
+      (103, 9, 3, 9.99, 'Classic Cheeseburger', DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)),
+      (103, 10, 1, 6.99, 'Loaded Fries', DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)),
+      (103, 11, 2, 4.99, 'Chocolate Milkshake', DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)),
+      
+      -- Order 4 items
+      (104, 13, 1, 8.99, 'California Roll', DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_SUB(NOW(), INTERVAL 1 DAY)),
+      (104, 15, 1, 3.99, 'Miso Soup', DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_SUB(NOW(), INTERVAL 1 DAY)),
+      
+      -- Order 5 items (in progress)
+      (105, 2, 1, 12.99, 'Fettuccine Alfredo', DATE_SUB(NOW(), INTERVAL 2 HOUR), DATE_SUB(NOW(), INTERVAL 2 HOUR)),
+      (105, 4, 1, 7.99, 'Bruschetta', DATE_SUB(NOW(), INTERVAL 2 HOUR), DATE_SUB(NOW(), INTERVAL 2 HOUR));
+
+    -- Order Status History
+    INSERT INTO order_status_history (orderId, status, timestamp, notes, created_at, updated_at)
+    VALUES
+      -- Order 1 history
+      (101, 'PENDING', DATE_SUB(NOW(), INTERVAL 10 DAY), 'Order received', DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_SUB(NOW(), INTERVAL 10 DAY)),
+      (101, 'CONFIRMED', DATE_SUB(NOW(), INTERVAL 10 DAY), 'Order confirmed by restaurant', DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_SUB(NOW(), INTERVAL 10 DAY)),
+      (101, 'COOKING', DATE_SUB(NOW(), INTERVAL 10 DAY), 'Order being prepared', DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_SUB(NOW(), INTERVAL 10 DAY)),
+      (101, 'READY_FOR_PICKUP', DATE_SUB(NOW(), INTERVAL 10 DAY), 'Order ready for delivery', DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_SUB(NOW(), INTERVAL 10 DAY)),
+      (101, 'OUT_FOR_DELIVERY', DATE_SUB(NOW(), INTERVAL 10 DAY), 'Order out for delivery', DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_SUB(NOW(), INTERVAL 10 DAY)),
+      (101, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 10 DAY), 'Order delivered successfully', DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_SUB(NOW(), INTERVAL 10 DAY)),
+      
+      -- Order 2 history
+      (102, 'PENDING', DATE_SUB(NOW(), INTERVAL 5 DAY), 'Order received', DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_SUB(NOW(), INTERVAL 5 DAY)),
+      (102, 'CONFIRMED', DATE_SUB(NOW(), INTERVAL 5 DAY), 'Order confirmed by restaurant', DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_SUB(NOW(), INTERVAL 5 DAY)),
+      (102, 'COOKING', DATE_SUB(NOW(), INTERVAL 5 DAY), 'Order being prepared', DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_SUB(NOW(), INTERVAL 5 DAY)),
+      (102, 'READY_FOR_PICKUP', DATE_SUB(NOW(), INTERVAL 5 DAY), 'Order ready for delivery', DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_SUB(NOW(), INTERVAL 5 DAY)),
+      (102, 'OUT_FOR_DELIVERY', DATE_SUB(NOW(), INTERVAL 5 DAY), 'Order out for delivery', DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_SUB(NOW(), INTERVAL 5 DAY)),
+      (102, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 5 DAY), 'Order delivered successfully', DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_SUB(NOW(), INTERVAL 5 DAY)),
+      
+      -- Order 3 history
+      (103, 'PENDING', DATE_SUB(NOW(), INTERVAL 2 DAY), 'Order received', DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)),
+      (103, 'CONFIRMED', DATE_SUB(NOW(), INTERVAL 2 DAY), 'Order confirmed by restaurant', DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)),
+      (103, 'COOKING', DATE_SUB(NOW(), INTERVAL 2 DAY), 'Order being prepared', DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)),
+      (103, 'READY_FOR_PICKUP', DATE_SUB(NOW(), INTERVAL 2 DAY), 'Order ready for delivery', DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)),
+      (103, 'OUT_FOR_DELIVERY', DATE_SUB(NOW(), INTERVAL 2 DAY), 'Order out for delivery', DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)),
+      (103, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), 'Order delivered successfully', DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)),
+      
+      -- Order 4 history (cancelled)
+      (104, 'PENDING', DATE_SUB(NOW(), INTERVAL 1 DAY), 'Order received', DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_SUB(NOW(), INTERVAL 1 DAY)),
+      (104, 'CONFIRMED', DATE_SUB(NOW(), INTERVAL 1 DAY), 'Order confirmed by restaurant', DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_SUB(NOW(), INTERVAL 1 DAY)),
+      (104, 'CANCELLED', DATE_SUB(NOW(), INTERVAL 1 DAY), 'Order cancelled by customer', DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_SUB(NOW(), INTERVAL 1 DAY)),
+      
+      -- Order 5 history (in progress)
+      (105, 'PENDING', DATE_SUB(NOW(), INTERVAL 2 HOUR), 'Order received', DATE_SUB(NOW(), INTERVAL 2 HOUR), DATE_SUB(NOW(), INTERVAL 2 HOUR)),
+      (105, 'CONFIRMED', DATE_SUB(NOW(), INTERVAL 1 HOUR), 'Order confirmed by restaurant', DATE_SUB(NOW(), INTERVAL 1 HOUR), DATE_SUB(NOW(), INTERVAL 1 HOUR)),
+      (105, 'COOKING', DATE_SUB(NOW(), INTERVAL 30 MINUTE), 'Order being prepared', DATE_SUB(NOW(), INTERVAL 30 MINUTE), DATE_SUB(NOW(), INTERVAL 30 MINUTE));
+
+    -- Insert sample payments
+    INSERT INTO payments (orderId, amount, status, paymentMethod, transactionId, created_at, updated_at)
+    VALUES
+      (101, 29.97, 'COMPLETED', 'CARD', 'txn_demo12345', DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_SUB(NOW(), INTERVAL 10 DAY)),
+      (102, 21.49, 'COMPLETED', 'CARD', 'txn_demo54321', DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_SUB(NOW(), INTERVAL 5 DAY)),
+      (103, 39.74, 'COMPLETED', 'CARD', 'txn_demo67890', DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)),
+      (104, 15.24, 'REFUNDED', 'CARD', 'txn_demo09876', DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_SUB(NOW(), INTERVAL 1 DAY)),
+      (105, 23.97, 'COMPLETED', 'CARD', 'txn_demo43210', DATE_SUB(NOW(), INTERVAL 2 HOUR), DATE_SUB(NOW(), INTERVAL 2 HOUR));
+
+    -- Insert sample deliveries
+    INSERT INTO deliveries (orderId, assignedRiderId, pickupAddress, deliveryAddress, distance, status, picked_up_at, delivered_at, created_at, updated_at)
+    VALUES
+      (101, 1, 'Tasty Bites, 123 Food St, Cuisine City', '123 Main St, City', 3.5, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_SUB(NOW(), INTERVAL 10 DAY)),
+      (102, 2, 'Spice Garden, 456 Spice Ave, Flavor Town', '456 Elm St, Town', 2.8, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_SUB(NOW(), INTERVAL 5 DAY)),
+      (103, 1, 'Burger Palace, 789 Burger Blvd, Meal City', '123 Main St, City', 4.2, 'DELIVERED', DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)),
+      (104, NULL, 'Sushi Heaven, 321 Fish Ln, Ocean Town', '456 Elm St, Town', NULL, 'CANCELLED', NULL, NULL, DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_SUB(NOW(), INTERVAL 1 DAY)),
+      (105, 2, 'Tasty Bites, 123 Food St, Cuisine City', '123 Main St, City', 3.5, 'ASSIGNED', NULL, NULL, DATE_SUB(NOW(), INTERVAL 2 HOUR), DATE_SUB(NOW(), INTERVAL 2 HOUR));

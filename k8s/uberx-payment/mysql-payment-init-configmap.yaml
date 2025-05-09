@@ -46,6 +46,22 @@ data:
       FOREIGN KEY (paymentId) REFERENCES payments(id) ON DELETE CASCADE,
       UNIQUE KEY unique_refund (stripeRefundId)
     );
+
+    -- Payment methods table
+    CREATE TABLE IF NOT EXISTS payment_methods (
+      id VARCHAR(50) PRIMARY KEY,
+      user_id INT UNSIGNED NOT NULL,
+      type VARCHAR(20) NOT NULL,
+      provider VARCHAR(20) NOT NULL,
+      account_number VARCHAR(255) NOT NULL,
+      last4 VARCHAR(4) NOT NULL,
+      expiry_month INT NOT NULL,
+      expiry_year INT NOT NULL,
+      cardholder_name VARCHAR(100),
+      is_default BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    );
     
     -- Add indexes
     ALTER TABLE payments ADD INDEX idx_status (status);
@@ -54,3 +70,38 @@ data:
     ALTER TABLE payment_logs ADD INDEX idx_created_at (created_at);
     ALTER TABLE refunds ADD INDEX idx_status (status);
     ALTER TABLE refunds ADD INDEX idx_created_at (created_at);
+    
+    -- Insert sample payment methods
+    INSERT INTO payment_methods (id, user_id, type, provider, account_number, last4, expiry_month, expiry_year, cardholder_name, is_default, created_at, updated_at)
+    VALUES
+      ('pm_001', 1, 'CREDIT_CARD', 'VISA', '4111111111111111', '1111', 12, 2025, 'John Doe', true, NOW(), NOW()),
+      ('pm_002', 1, 'CREDIT_CARD', 'MASTERCARD', '5555555555554444', '4444', 10, 2026, 'John Doe', false, NOW(), NOW()),
+      ('pm_003', 2, 'CREDIT_CARD', 'VISA', '4111222233334444', '4444', 8, 2025, 'Jane Smith', true, NOW(), NOW()),
+      ('pm_004', 2, 'DEBIT_CARD', 'VISA', '4222333344445555', '5555', 3, 2024, 'Jane Smith', false, NOW(), NOW());
+    
+    -- Insert sample payments
+    INSERT INTO payments (id, orderId, stripePaymentIntentId, amount, currency, status, paymentMethod, transactionId, created_at, updated_at)
+    VALUES
+      (1, 101, 'pi_sample12345', 25.99, 'USD', 'COMPLETED', 'CARD', 'txn_demo12345', DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_SUB(NOW(), INTERVAL 10 DAY)),
+      (2, 102, 'pi_sample54321', 18.50, 'USD', 'COMPLETED', 'CARD', 'txn_demo54321', DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_SUB(NOW(), INTERVAL 5 DAY)),
+      (3, 103, 'pi_sample67890', 36.75, 'USD', 'COMPLETED', 'CARD', 'txn_demo67890', DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY)),
+      (4, 104, 'pi_sample09876', 12.25, 'USD', 'FAILED', 'CARD', 'txn_demo09876', DATE_SUB(NOW(), INTERVAL 1 DAY), DATE_SUB(NOW(), INTERVAL 1 DAY));
+    
+    -- Insert payment logs
+    INSERT INTO payment_logs (paymentId, event, data, created_at)
+    VALUES
+      (1, 'PAYMENT_INITIATED', '{"user_id": 1, "amount": 25.99}', DATE_SUB(NOW(), INTERVAL 10 DAY)),
+      (1, 'PAYMENT_PROCESSING', '{"processor": "STRIPE"}', DATE_SUB(NOW(), INTERVAL 10 DAY)),
+      (1, 'PAYMENT_COMPLETED', '{"transaction_id": "txn_demo12345"}', DATE_SUB(NOW(), INTERVAL 10 DAY)),
+      
+      (2, 'PAYMENT_INITIATED', '{"user_id": 2, "amount": 18.50}', DATE_SUB(NOW(), INTERVAL 5 DAY)),
+      (2, 'PAYMENT_PROCESSING', '{"processor": "STRIPE"}', DATE_SUB(NOW(), INTERVAL 5 DAY)),
+      (2, 'PAYMENT_COMPLETED', '{"transaction_id": "txn_demo54321"}', DATE_SUB(NOW(), INTERVAL 5 DAY)),
+      
+      (3, 'PAYMENT_INITIATED', '{"user_id": 1, "amount": 36.75}', DATE_SUB(NOW(), INTERVAL 2 DAY)),
+      (3, 'PAYMENT_PROCESSING', '{"processor": "STRIPE"}', DATE_SUB(NOW(), INTERVAL 2 DAY)),
+      (3, 'PAYMENT_COMPLETED', '{"transaction_id": "txn_demo67890"}', DATE_SUB(NOW(), INTERVAL 2 DAY)),
+      
+      (4, 'PAYMENT_INITIATED', '{"user_id": 2, "amount": 12.25}', DATE_SUB(NOW(), INTERVAL 1 DAY)),
+      (4, 'PAYMENT_PROCESSING', '{"processor": "STRIPE"}', DATE_SUB(NOW(), INTERVAL 1 DAY)),
+      (4, 'PAYMENT_FAILED', '{"reason": "insufficient_funds"}', DATE_SUB(NOW(), INTERVAL 1 DAY));

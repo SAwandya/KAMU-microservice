@@ -28,6 +28,30 @@ exports.createPaymentIntent = async (req, res) => {
   }
 };
 
+exports.processPayment = async (req, res) => {
+  try {
+    const { amount, paymentMethodId, orderId } = req.body;
+
+    if (!amount || !paymentMethodId || !orderId) {
+      return res.status(400).json({
+        error: "Missing required fields: amount, paymentMethodId, and orderId are required"
+      });
+    }
+
+    // Process payment through payment service
+    const paymentResult = await paymentService.processPayment({
+      amount,
+      paymentMethodId,
+      orderId
+    });
+
+    res.status(200).json(paymentResult);
+  } catch (error) {
+    console.error("Error processing payment:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 exports.createCheckoutSession = async (req, res) => {
   try {
     const { orderId, customerId, items, totalAmount } = req.body;

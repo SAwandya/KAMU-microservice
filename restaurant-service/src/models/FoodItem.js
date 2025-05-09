@@ -6,7 +6,8 @@ class FoodItem {
     description,
     price,
     prepareTime,
-    isPromotion
+    isPromotion,
+    image
   ) {
     this.id = id;
     this.restaurantId = restaurantId;
@@ -15,6 +16,7 @@ class FoodItem {
     this.price = price;
     this.prepareTime = prepareTime;
     this.isPromotion = isPromotion;
+    this.image = image;
   }
 }
 module.exports = FoodItem;

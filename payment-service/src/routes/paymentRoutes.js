@@ -10,6 +10,9 @@ router.post("/intent", paymentController.createPaymentIntent);
 // Create a checkout session
 router.post("/checkout", paymentController.createCheckoutSession);
 
+// Process a payment
+router.post("/process", paymentController.processPayment);
+
 // Handle Stripe webhook
 router.post("/webhook", paymentController.handleWebhook);
 

@@ -2,32 +2,140 @@
 version: '3'
 
 services:
-  mysql:
+  # Database services for each microservice
+  auth-db:
     image: mysql:8.0
-    container_name: mysql
+    container_name: auth-db
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: auth_db
+      MYSQL_DATABASE: auth_service
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     ports:
       - "3306:3306"
     volumes:
-      - mysql-data:/var/lib/mysql
+      - auth-db-data:/var/lib/mysql
+      - ./db-init-scripts/01-auth-init.sql:/docker-entrypoint-initdb.d/01-auth-init.sql
     networks:
       - microservices-network
 
+  restaurant-db:
+    image: mysql:8.0
+    container_name: restaurant-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: restaurant_service
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3307:3306"
+    volumes:
+      - restaurant-db-data:/var/lib/mysql
+      - ./db-init-scripts/02-restaurant-init.sql:/docker-entrypoint-initdb.d/02-restaurant-init.sql
+    networks:
+      - microservices-network
+
+  order-db:
+    image: mysql:8.0
+    container_name: order-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: order_service
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3308:3306"
+    volumes:
+      - order-db-data:/var/lib/mysql
+      - ./db-init-scripts/04-order-init.sql:/docker-entrypoint-initdb.d/04-order-init.sql
+    networks:
+      - microservices-network
+
+  payment-db:
+    image: mysql:8.0
+    container_name: payment-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: payment_service
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3309:3306"
+    volumes:
+      - payment-db-data:/var/lib/mysql
+      - ./db-init-scripts/03-payment-init.sql:/docker-entrypoint-initdb.d/03-payment-init.sql
+    networks:
+      - microservices-network
+
+  delivery-db:
+    image: mysql:8.0
+    container_name: delivery-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: delivery_service
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3310:3306"
+    volumes:
+      - delivery-db-data:/var/lib/mysql
+      - ./db-init-scripts/05-delivery-init.sql:/docker-entrypoint-initdb.d/05-delivery-init.sql
+    networks:
+      - microservices-network
+
+  promotion-db:
+    image: mysql:8.0
+    container_name: promotion-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: promotion_service
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3311:3306"
+    volumes:
+      - promotion-db-data:/var/lib/mysql
+      - ./db-init-scripts/06-promotion-init.sql:/docker-entrypoint-initdb.d/06-promotion-init.sql
+    networks:
+      - microservices-network
+
+  # Service initializer to run after databases are up
+  db-initializer:
+    image: mysql:8.0
+    container_name: db-initializer
+    command: >
+      /bin/bash -c "
+        chmod +x /scripts/init-databases.sh &&
+        /scripts/init-databases.sh
+      "
+    environment:
+      DB_PASSWORD: rootpassword
+    volumes:
+      - ./db-init-scripts:/scripts
+      - ./db-init-scripts:/docker-entrypoint-initdb.d
+    depends_on:
+      - auth-db
+      - restaurant-db
+      - order-db
+      - payment-db
+      - delivery-db
+      - promotion-db
+    networks:
+      - microservices-network
+    restart: on-failure
+
+  # Microservices
   auth-service:
     build: ./auth-service
     container_name: auth-service
     environment:
       - NODE_ENV=development
       - PORT=3000
-      - DB_HOST=mysql
+      - DB_HOST=auth-db
       - DB_PORT=3306
       - DB_USER=user
       - DB_PASSWORD=password
-      - DB_NAME=auth_db
+      - DB_NAME=auth_service
       - ACCESS_TOKEN_SECRET=your_access_token_secret
       - ACCESS_TOKEN_EXPIRY=15m
       - REFRESH_TOKEN_SECRET=your_refresh_token_secret
@@ -35,7 +143,8 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - mysql
+      - auth-db
+      - db-initializer
     networks:
       - microservices-network
 
@@ -45,16 +154,93 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=4001
-      - DB_HOST=mysql
+      - DB_HOST=order-db
       - DB_PORT=3306
       - DB_USER=user
       - DB_PASSWORD=password
-      - DB_NAME=auth_db
+      - DB_NAME=order_service
     ports:
       - "4001:4001"
     depends_on:
-      - mysql
+      - order-db
       - auth-service
+      - db-initializer
+    networks:
+      - microservices-network
+
+  restaurant-service:
+    build: ./restaurant-service
+    container_name: restaurant-service
+    environment:
+      - NODE_ENV=development
+      - PORT=4002
+      - DB_HOST=restaurant-db
+      - DB_PORT=3306
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_NAME=restaurant_service
+    ports:
+      - "4002:4002"
+    depends_on:
+      - restaurant-db
+      - db-initializer
+    networks:
+      - microservices-network
+
+  payment-service:
+    build: ./payment-service
+    container_name: payment-service
+    environment:
+      - NODE_ENV=development
+      - PORT=4003
+      - DB_HOST=payment-db
+      - DB_PORT=3306
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_NAME=payment_service
+    ports:
+      - "4003:4003"
+    depends_on:
+      - payment-db
+      - db-initializer
+    networks:
+      - microservices-network
+
+  delivery-service:
+    build: ./delivery-service
+    container_name: delivery-service
+    environment:
+      - NODE_ENV=development
+      - PORT=4004
+      - DB_HOST=delivery-db
+      - DB_PORT=3306
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_NAME=delivery_service
+    ports:
+      - "4004:4004"
+    depends_on:
+      - delivery-db
+      - db-initializer
+    networks:
+      - microservices-network
+
+  promotion-service:
+    build: ./promotion-service
+    container_name: promotion-service
+    environment:
+      - NODE_ENV=development
+      - PORT=4005
+      - DB_HOST=promotion-db
+      - DB_PORT=3306
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_NAME=promotion_service
+    ports:
+      - "4005:4005"
+    depends_on:
+      - promotion-db
+      - db-initializer
     networks:
       - microservices-network
 
@@ -66,6 +252,10 @@ services:
     depends_on:
       - auth-service
       - order-service
+      - restaurant-service
+      - payment-service
+      - delivery-service
+      - promotion-service
     networks:
       - microservices-network
 
@@ -74,4 +264,9 @@ networks:
     driver: bridge
 
 volumes:
-  mysql-data:
+  auth-db-data:
+  restaurant-db-data:
+  order-db-data:
+  payment-db-data:
+  delivery-db-data:
+  promotion-db-data:

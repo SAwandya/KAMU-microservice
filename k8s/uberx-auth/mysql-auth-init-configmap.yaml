@@ -39,3 +39,16 @@ data:
         UNIQUE KEY unique_token (token_hash),
         FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
     );
+    
+    # Insert initial user data
+    INSERT INTO users (id, email, password, fullName, role, address, phone, is_active, is_verified, created_at, updated_at)
+    VALUES 
+      ('1', 'john@example.com', '$2a$10$XOPPbS.3Z/UVl0F9Pb1W4OJE7RwrFEIEYUy3FYGmWzKIPU9PKZ6lm', 'John Doe', 'customer', '123 Main St, City', '1234567890', true, true, NOW(), NOW()),
+      ('2', 'jane@example.com', '$2a$10$XOPPbS.3Z/UVl0F9Pb1W4OJE7RwrFEIEYUy3FYGmWzKIPU9PKZ6lm', 'Jane Smith', 'customer', '456 Elm St, Town', '0987654321', true, true, NOW(), NOW()),
+      ('3', 'admin@kamu.com', '$2a$10$XOPPbS.3Z/UVl0F9Pb1W4OJE7RwrFEIEYUy3FYGmWzKIPU9PKZ6lm', 'Admin User', 'admin', 'KAMU HQ, Business District', '1122334455', true, true, NOW(), NOW()),
+      ('4', 'manager@restaurant.com', '$2a$10$XOPPbS.3Z/UVl0F9Pb1W4OJE7RwrFEIEYUy3FYGmWzKIPU9PKZ6lm', 'Restaurant Manager', 'restaurant', 'Restaurant A, Food Street', '5566778899', true, true, NOW(), NOW()),
+      ('5', 'driver@kamu.com', '$2a$10$XOPPbS.3Z/UVl0F9Pb1W4OJE7RwrFEIEYUy3FYGmWzKIPU9PKZ6lm', 'Delivery Driver', 'driver', '789 Drive Way, City', '1231231234', true, true, NOW(), NOW())
+    ON DUPLICATE KEY UPDATE
+      updated_at = NOW();
+
+    # Note: All passwords are 'password123' encrypted with bcrypt
