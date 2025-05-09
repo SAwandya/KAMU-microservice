@@ -17,6 +17,15 @@ exports.getMine = async (req, res, next) => {
     next(e);
   }
 };
+exports.getById = async (req, res, next) => {
+  try {
+    const r = await svc.getById(req.params.id);
+    if (!r) return res.status(404).json({ message: "Restaurant not found" });
+    res.json({ restaurant: r });
+  } catch (e) {
+    next(e);
+  }
+};
 exports.approve = async (req, res, next) => {
   try {
     const r = await svc.approve(req.params.id);

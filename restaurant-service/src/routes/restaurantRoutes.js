@@ -17,6 +17,8 @@ route.get(
   authorizeRole("RestaurantAdmin"),
   restaurantController.getMine
 );
+// Get restaurant by ID - publicly accessible endpoint
+route.get("/:id", restaurantController.getById);
 route.put(
   "/:id/approve",
   authenticate,

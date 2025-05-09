@@ -2,6 +2,7 @@ const repo = require("../repositories/restaurantRepository");
 exports.register = async (ownerId, payload) =>
   repo.create({ ownerId, ...payload });
 exports.getMine = async (ownerId) => repo.findByOwner(ownerId);
+exports.getById = async (id) => repo.findById(id);
 exports.approve = async (id) =>
   repo.updateStatus(
     id,
