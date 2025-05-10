@@ -60,5 +60,14 @@ exports.getTripById = async (tripId) => {
     }
 };
 
+exports.getAllTrips = async () => {
+    try {
+        const trips = await tripRepository.findAllTrips();
+        return trips;
+    } catch (error) {
+        throw new Error(`Failed to fetch trips: ${error.message}`);
+    }
+};
+
 
 
