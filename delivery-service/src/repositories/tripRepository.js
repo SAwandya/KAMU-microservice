@@ -94,3 +94,23 @@ exports.updateTrip = async (tripId, updateData) => {
         throw new Error(`Database error updating trip: ${error.message}`);
     }
 };
+
+exports.findAllTrips = async () => {
+    try {
+        const [rows] = await pool.execute("SELECT * FROM trips");
+        return rows.map(trip => new Trip(
+            trip.id,
+            trip.orderId,
+            trip.riderId,
+            trip.customerId,
+            trip.status,
+            JSON.parse(trip.startLocation),
+            JSON.parse(trip.endLocation),
+            trip.created_at,
+            trip.updated_at
+        ));
+    } catch (error) {
+        console.error('Error finding all trips:', error);
+        throw new Error(`Database error finding trips: ${error.message}`);
+    }
+};

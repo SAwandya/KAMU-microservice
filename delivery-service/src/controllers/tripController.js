@@ -91,3 +91,12 @@ exports.updateTrip = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.getAllTrips = async (req, res, next) => {
+    try {
+        const trips = await tripService.getAllTrips();
+        res.status(200).json(trips);
+    } catch (error) {
+        next(error);
+    }
+};
