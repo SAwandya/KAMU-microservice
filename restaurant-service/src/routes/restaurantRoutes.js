@@ -12,10 +12,20 @@ route.post(
   restaurantController.register
 );
 route.get(
+  "/",
+  authenticate,
+  restaurantController.getAll
+);
+route.get(
   "/me",
   authenticate,
   authorizeRole("RestaurantAdmin"),
   restaurantController.getMine
+);
+route.get(
+  "/:id",
+  authenticate,
+  restaurantController.getById
 );
 route.put(
   "/:id/approve",

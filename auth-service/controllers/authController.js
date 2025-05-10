@@ -21,6 +21,23 @@ exports.registerCustomer = async (req, res, next) => {
   }
 };
 
+exports.getUserById = async (req, res) => {
+  const userId = req.params.id;
+  if (!userId) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+  try {
+    const user = await authService.getUserById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 exports.getUser = async (req, res) => {
   try {
     const user = await authService.getAllUser();
@@ -64,16 +81,22 @@ exports.login = async (req, res, next) => {
     const result = await authService.login(email, password);
 
     // Set refresh token as HTTP-only cookie
-    res.cookie("refreshToken", result.tokens.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+    // res.cookie("refreshToken", result.tokens.refreshToken, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === "production",
+    //   sameSite: "strict",
+    //   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    // });
+
+    res.setHeader("Set-Cookie", [
+      `accessToken=${result.tokens.accessToken}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=3600`, // Expires in 1 hour
+      `refreshToken=${result.tokens.refreshToken}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=604800`, // Expires in 7 days
+    ]);
 
     res.json({
       user: result.user,
       accessToken: result.tokens.accessToken,
+      refreshToken: result.tokens.refreshToken,
     });
   } catch (error) {
     next(error);

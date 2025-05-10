@@ -9,3 +9,6 @@ exports.approve = async (id) =>
   );
 exports.update = async (id, data) => repo.update(id, data);
 exports.delete = async (id) => repo.delete(id);
+exports.getAll = async () => repo.findAll();
+
+exports.getById = async (id) => repo.findById(id);

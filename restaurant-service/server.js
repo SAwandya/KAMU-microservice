@@ -8,11 +8,20 @@ const scheduleRoutes = require("./src/routes/restaurantScheduleRoutes");
 const foodItemRoutes = require("./src/routes/foodItemRoutes");
 const orderRoutes = require("./src/routes/restaurantOrderRoutes");
 const errorHandler = require("./src/middlewares/errorHandler");
+const cors = require("cors");
+
 
 async function start() {
   const app = express();
   app.use(express.json());
   // await natsMgr.connect(); // load subscriber
+
+  app.use(
+    cors({
+      origin: "http://localhost:5174",
+      credentials: true,
+    })
+  );
 
   // Health check endpoint
   app.get("/health", (req, res) => {

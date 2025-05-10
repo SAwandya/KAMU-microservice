@@ -45,6 +45,20 @@ exports.getAllUser = async () => {
   }));
 }
 
+exports.getUserById = async (userId) => {
+  const user = await userRepository.findById(userId);
+  if (!user) {
+    throw new Error("User not found");
+  }
+  return {
+    id: user.id,
+    fullName: user.fullName,
+    email: user.email,
+    role: user.role,
+    vehicleREG: user.vehicleREG,
+  };
+};
+
 exports.registerRider = async (userData) => {
   // Check if user already exists
   const existingUser = await userRepository.findByEmail(userData.email);
@@ -113,6 +127,7 @@ exports.login = async (email, password) => {
       id: user.id,
       fullName: user.fullName,
       email: user.email,
+      role: user.role,
     },
     tokens: {
       accessToken,

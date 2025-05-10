@@ -8,6 +8,26 @@ exports.register = async (req, res, next) => {
     next(e);
   }
 };
+
+exports.getAll = async (req, res, next) => {
+  try {
+    const r = await svc.getAll();
+    res.json({ restaurants: r });
+  } catch (e) {
+    next(e);
+  }
+};
+
+exports.getById = async (req, res, next) => {
+  try {
+    const r = await svc.getById(req.params.id);
+    if (!r) return res.status(404).end();
+    res.json({ restaurant: r });
+  } catch (e) {
+    next(e);
+  }
+};
+
 exports.getMine = async (req, res, next) => {
   try {
     const r = await svc.getMine(req.user.userId);
