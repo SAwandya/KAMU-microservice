@@ -16,6 +16,23 @@ exports.create = async ({ ownerId, name, address, images }) => {
     RESTAURANT_STATUS.PENDING
   );
 };
+
+exports.findAll = async () => {
+  const [r] = await pool.execute(`SELECT * FROM Restaurant`);
+  if (!r.length) return [];
+  return r.map((x) => {
+    return new Restaurant(
+      x.id,
+      x.ownerId,
+      x.name,
+      x.address,
+      x.images,
+      !!x.isAvailable,
+      x.status
+    );
+  });
+};
+
 exports.findById = async (id) => {
   const [r] = await pool.execute(`SELECT * FROM Restaurant WHERE id=?`, [id]);
   if (!r.length) return null;

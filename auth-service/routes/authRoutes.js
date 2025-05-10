@@ -10,6 +10,7 @@ router.post("/login", authController.login);
 router.post("/refresh-token", authController.refreshToken);
 router.post("/validate", authController.validateToken);
 router.get("/user", authController.getUser);
+router.get("/user/:id", authenticate, authController.getUserById);
 
 // Protected routes
 router.post("/logout", authenticate, authController.logout);
