@@ -18,7 +18,7 @@ async function start() {
 
   app.use(
     cors({
-      origin: "http://localhost:5174",
+      origin: env.CORS_ORIGIN,
       credentials: true,
     })
   );
