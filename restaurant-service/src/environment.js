@@ -15,4 +15,6 @@ module.exports = {
 
   LOG_LEVEL: process.env.LOG_LEVEL || "info",
   NATS_URL: process.env.NATS_URL || "nats://nats:4222",
+  CORS_ORIGIN:
+    process.env.CORS_ORIGIN ,
 };
