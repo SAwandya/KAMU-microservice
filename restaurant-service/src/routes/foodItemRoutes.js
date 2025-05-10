@@ -5,6 +5,7 @@ const {
   authorizeRole,
 } = require("../middlewares/authMiddleware");
 fi.post("/", authenticate, authorizeRole("RestaurantAdmin"), cFI.add);
+fi.get("/restaurant/:id", authenticate, cFI.getByRestaurantId);
 fi.get("/", authenticate, authorizeRole("RestaurantAdmin"), cFI.list);
 fi.put("/:id", authenticate, authorizeRole("RestaurantAdmin"), cFI.update);
 fi.delete("/:id", authenticate, authorizeRole("RestaurantAdmin"), cFI.delete);

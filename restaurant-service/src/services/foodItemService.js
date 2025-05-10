@@ -1,1 +1,7 @@
-const repoFI=require('../repositories/foodItemRepository'); exports.add=(data)=>repoFI.create(data); exports.list=(rid)=>repoFI.findByRestaurant(rid); exports.update=(id,data)=>repoFI.update(id,data); exports.delete=(id)=>repoFI.delete(id);
+const e = require("express");
+const repoFI = require("../repositories/foodItemRepository");
+exports.add = (data) => repoFI.create(data);
+exports.list = (rid) => repoFI.findByRestaurant(rid);
+exports.update = (id, data) => repoFI.update(id, data);
+exports.delete = (id) => repoFI.delete(id);
+exports.getByRestaurantId = (id) => repoFI.findByRestaurant(id);

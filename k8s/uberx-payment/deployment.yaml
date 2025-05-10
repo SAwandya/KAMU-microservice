@@ -27,7 +27,7 @@ spec:
         - name: NODE_ENV
           value: "production"
         - name: PORT
-          value: "4001"
+          value: "4006"
         - name: DB_HOST
           # Connect to DB service in the same namespace
           value: "mysql-payment" # <--- UPDATED HOST
@@ -73,12 +73,12 @@ spec:
         livenessProbe:
           httpGet:
             path: /health
-            port: 4001
+            port: 4006
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /health
-            port: 4001
+            port: 4006
           initialDelaySeconds: 5
           periodSeconds: 5

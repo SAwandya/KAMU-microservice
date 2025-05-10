@@ -39,3 +39,5 @@ data:
         UNIQUE KEY unique_token (token_hash),
         FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
     );
+
+    
