@@ -1,0 +1,13 @@
+# k8s/notification-service/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+  namespace: uberx-notification # <--- UPDATED NAMESPACE
+spec:
+  selector:
+    app: notification-service
+  ports:
+  - port: 7000
+    targetPort: 7000
+  type: ClusterIP

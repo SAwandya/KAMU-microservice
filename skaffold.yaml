@@ -139,6 +139,39 @@ build:
           - src: "events/**/*.js"
             dest: .
 
+    - image: sachilaawandya/promotion-service
+      context: promotion-service
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: "src/**/*.js"
+            dest: .
+          - src: "*.js"
+            dest: .
+          - src: "controllers/**/*.js"
+            dest: .
+          - src: "services/**/*.js"
+            dest: .
+          - src: "routes/**/*.js"
+            dest: .
+          - src: "middleware/**/*.js"
+            dest: .
+          - src: "utils/**/*.js"
+            dest: .
+          - src: "events/**/*.js"
+            dest: .
+
+    - image: thusalapi/notification-service
+      context: notification-service
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: "*.js"
+            dest: .
+   
+
     - image: thusalapi/nginx # The custom image name you want to build
       context: nginx # The directory containing Dockerfile and nginx.conf
       docker:
@@ -170,6 +203,16 @@ manifests:
     - k8s/uberx-order/deployment.yaml
     - k8s/uberx-order/service.yaml
     - k8s/uberx-order/jwt-secrets.yaml
+
+    # Deploy Order related resources (including its DB and secret)
+    - k8s/uberx-promotion/mysql-promotion-pv.yaml
+    - k8s/uberx-promotion/mysql-promotion-credentials.yaml
+    - k8s/uberx-promotion/mysql-promotion-init-configmap.yaml
+    - k8s/uberx-promotion/mysql-promotion-deployment.yaml
+    - k8s/uberx-promotion/mysql-promotion-service.yaml
+    - k8s/uberx-promotion/deployment.yaml
+    - k8s/uberx-promotion/service.yaml
+    - k8s/uberx-promotion/jwt-secrets.yaml
 
     # Deploy delivery related resources (including its DB and secret)
     - k8s/uberx-delivery/mysql-delivery-pv.yaml
@@ -204,6 +247,11 @@ manifests:
     - k8s/uberx-restaurant/service.yaml
     - k8s/uberx-restaurant/jwt-secrets.yaml
 
+    # Deploy payment related resources (including its DB and secret)
+    - k8s/uberx-notification/deployment.yaml
+    - k8s/uberx-notification/service.yaml
+
+
     # Deploy Gateway resources
     - k8s/uberx-gateway/deployment.yaml
     - k8s/uberx-gateway/service.yaml
@@ -230,6 +278,16 @@ portForward:
     namespace: uberx-order
     port: 4001
     localPort: 4001
+  - resourceType: service
+    resourceName: promotion-service
+    namespace: uberx-promotion
+    port: 5005
+    localPort: 5005
+  - resourceType: service
+    resourceName: notification-service
+    namespace: uberx-notification
+    port: 7000
+    localPort: 7000
   - resourceType: service
     resourceName: mysql-auth
     namespace: uberx-auth # <<< UPDATED NAMESPACE

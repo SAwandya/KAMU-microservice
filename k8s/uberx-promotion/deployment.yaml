@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: promotion-service
-        image: thusalapi/promotion-service:latest
+        image: sachilaawandya/promotion-service:latest
         ports:
         - containerPort: 4001
         env:
@@ -27,7 +27,7 @@ spec:
         - name: NODE_ENV
           value: "production"
         - name: PORT
-          value: "5001"
+          value: "5005"
         - name: DB_HOST
           # Connect to DB service in the same namespace
           value: "mysql-promotion" # <--- UPDATED HOST
@@ -63,12 +63,12 @@ spec:
         livenessProbe:
           httpGet:
             path: /health
-            port: 5001
+            port: 5005
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /health
-            port: 5001
+            port: 5005
           initialDelaySeconds: 5
           periodSeconds: 5
