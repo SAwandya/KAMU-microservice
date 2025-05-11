@@ -173,3 +173,38 @@ exports.logoutAll = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.updateUser = async (req, res, next) => {
+  try {
+    const userId = req.params.id;
+    const userData = req.body;
+
+    // Basic validation
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+    if (Object.keys(userData).length === 0) {
+      return res.status(400).json({ message: "No update data provided" });
+    }
+
+    const updatedUser = await authService.updateUser(userId, userData);
+    res.json(updatedUser);
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.deleteUser = async (req, res, next) => {
+  try {
+    const userId = req.params.id;
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    await authService.deleteUser(userId);
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+};

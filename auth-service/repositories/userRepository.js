@@ -137,3 +137,54 @@ exports.deleteAllRefreshTokens = async (userId) => {
     throw new Error(`Database error: ${error.message}`);
   }
 };
+
+exports.updateUser = async (userId, userData) => {
+  try {
+    const fields = [];
+    const values = [];
+    // Dynamically build the query based on provided userData
+    // Ensure only allowed fields can be updated
+    const allowedFields = ['fullName', 'email', 'password', 'role', 'vehicleREG', 'active']; // Added 'active'
+
+    Object.keys(userData).forEach(key => {
+      if (allowedFields.includes(key) && userData[key] !== undefined) {
+        fields.push(`${key} = ?`);
+        values.push(userData[key]);
+      }
+    });
+
+    if (fields.length === 0) {
+      throw new Error("No valid fields provided for update");
+    }
+
+    values.push(userId); // For the WHERE clause
+
+    const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
+    const [result] = await db.execute(sql, values);
+
+    if (result.affectedRows === 0) {
+      return null; // Or throw an error if user not found
+    }
+    // Fetch and return the updated user data, excluding password
+    const updatedUser = await this.findById(userId);
+    if (updatedUser) {
+      delete updatedUser.password; // Ensure password is not returned
+    }
+    return updatedUser;
+  } catch (error) {
+    console.error('Error in updateUser repository:', error);
+    throw new Error(`Database error: ${error.message}`);
+  }
+};
+
+exports.deleteUser = async (userId) => {
+  try {
+    // Optional: First, delete associated refresh tokens or handle foreign key constraints
+    await db.execute("DELETE FROM refresh_tokens WHERE userId = ?", [userId]);
+    const [result] = await db.execute("DELETE FROM users WHERE id = ?", [userId]);
+    return result.affectedRows > 0;
+  } catch (error) {
+    console.error('Error in deleteUser repository:', error);
+    throw new Error(`Database error: ${error.message}`);
+  }
+};

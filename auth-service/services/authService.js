@@ -184,3 +184,27 @@ exports.logout = async (userId, refreshToken) => {
 exports.logoutAll = async (userId) => {
   return await userRepository.deleteAllRefreshTokens(userId);
 };
+
+exports.updateUser = async (userId, userData) => {
+  // Add any validation or business logic here
+  // For example, prevent changing roles if not allowed, or hash password if it's being updated
+  if (userData.password) {
+    userData.password = await hashPassword(userData.password);
+  }
+  const updatedUser = await userRepository.updateUser(userId, userData);
+  if (!updatedUser) {
+    throw new Error("User not found or update failed");
+  }
+  // Return a cleaned-up user object, excluding password for example
+  const { password, ...userWithoutPassword } = updatedUser;
+  return userWithoutPassword;
+};
+
+exports.deleteUser = async (userId) => {
+  // Add any checks here, e.g., ensure admin is not deleting themselves
+  const result = await userRepository.deleteUser(userId);
+  if (!result) {
+    throw new Error("User not found or delete failed");
+  }
+  return { message: "User deleted successfully" };
+};
